@@ -10,11 +10,11 @@ class MainApplication(object):
         # Create root window
         # Create main window base frame
         self.root = Tk.Tk()
-
+        self.root.option_add('*foreground', '#0092CC')
         # Configure root window
         self.root.title("IRIS")
         self.root.protocol('WM_DELETE_WINDOW', self.shutdown)
-        self.root.geometry("800x600+100+100")
+        self.root.geometry("800x600")
         #self.root.resizable(0, 0)
         self.root.config(menu=MenuBar(self).menubar)
         self.root.mainloop()
@@ -23,8 +23,9 @@ class MainApplication(object):
         """
         This function is called when the user hit close window button
         """
-        answer = messagebox.askokcancel("Close", "Really close?")
-        if answer is True:
-            self.alive = False
-            # Close the main window
-            self.root.destroy()
+        self.root.destroy()  # while testing
+        #answer = messagebox.askokcancel("Close", "Really close?")
+        #if answer is True:
+        #    self.alive = False
+        #    # Close the main window
+        #    self.root.destroy()
