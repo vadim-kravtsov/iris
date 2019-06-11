@@ -2,6 +2,7 @@
 
 import tkinter as Tk
 from tkinter import messagebox
+from .GUI.menuBar import MenuBar
 
 
 class MainApplication(object):
@@ -15,7 +16,7 @@ class MainApplication(object):
         self.root.protocol('WM_DELETE_WINDOW', self.shutdown)
         self.root.geometry("800x600+100+100")
         #self.root.resizable(0, 0)
-
+        self.root.config(menu=MenuBar(self).menubar)
         self.root.mainloop()
 
     def shutdown(self):
