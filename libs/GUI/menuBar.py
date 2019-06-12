@@ -1,5 +1,6 @@
 import tkinter as Tk
 from tkinter import filedialog
+from .toolsWindows import DirBrowser
 from .. import fileSystem
 
 
@@ -14,11 +15,15 @@ class MenuBar(Tk.Frame):
         self.menubar.add_cascade(label="File", menu=self.filemenu)
 
     def open_file(self):
-        self.filename = filedialog.askopenfilename(parent=self.window.root,
-                                                   title="Choose a file", )
-        print(self.filename)
+        self.filenames = filedialog.askopenfilenames(parent=self.window.root,
+                                                     title="Choose a file",
+                                                     filetypes=(("fits files", fileSystem.fitsExts),
+                                                                ("all files", "*.*")))
+        if self.filenames:
+            print(self.filenames)
 
     def open_dir(self):
-        self.filenames = filedialog.askopenfilenames(parent=self.window.root,
-                                                     title="Choose a files", )
-        print(self.filenames)
+        self.pathToDir = filedialog.askdirectory(parent=self.window.root,
+                                                 title="Choose a directory")
+        if self.pathToDir:
+            self.window.dirbrowser = DirBrowser(self.window, self.pathToDir)

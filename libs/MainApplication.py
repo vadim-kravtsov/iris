@@ -10,12 +10,12 @@ class MainApplication(object):
         # Create root window
         # Create main window base frame
         self.root = Tk.Tk()
-        self.root.option_add('*foreground', '#0092CC')
+        self.root.option_add('*foreground', '#969696')
+
         # Configure root window
         self.root.title("IRIS")
         self.root.protocol('WM_DELETE_WINDOW', self.shutdown)
         self.root.geometry("800x600")
-        #self.root.resizable(0, 0)
         self.root.config(menu=MenuBar(self).menubar)
         self.root.mainloop()
 
