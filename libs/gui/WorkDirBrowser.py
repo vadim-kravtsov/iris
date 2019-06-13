@@ -1,43 +1,5 @@
-from .filesystem import ListOfFiles
 from .graphics import PlotCanvas
 from PyQt5 import QtCore, QtWidgets
-
-
-class MainApplication(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(200, 200, 1024, 768)
-
-        # Create menu bar with actions
-        menubar = self.menuBar()
-        file_menu = menubar.addMenu("File")
-        file_menu.addAction('&Open...', self.open_file)
-        file_menu.addAction('&Open directory...', self.open_directory)
-        self.show()
-
-    def open_file(self):
-
-        # List of all possible fits-file extensions
-        fits_extensions = "All files (*) ;; Fits files (*.fts *.FTS *.fit *.FIT *.fits *.FITS)"
-
-        # List of opened files
-        files = QtWidgets.QFileDialog.getOpenFileNames(parent=self,
-                                                       caption="Open file...",
-                                                       filter=fits_extensions)
-        print(files[0])
-
-    def open_directory(self):
-
-        # Path to opened directory
-        dir_path = QtWidgets.QFileDialog.getExistingDirectory(parent=self,
-                                                              caption="Open directory...")
-        print(dir_path)
-
-        # Start work dir browser window
-        self.work_dir_browser = WorkDirBrowser(self, ListOfFiles(dir_path))
 
 
 class WorkDirBrowser(QtWidgets.QWidget):
