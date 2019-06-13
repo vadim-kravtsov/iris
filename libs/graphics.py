@@ -1,26 +1,32 @@
-import random
+from astropy.io import fits
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QSizePolicy
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+
 
 class PlotCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=3, height=3, dpi=100):
         fig, self.ax = plt.subplots(figsize=(width, height), dpi=dpi)
-        
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
 
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
+        # Creating resizable FigureCanvas
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        self.plot()
 
-    def plot(self):
-        data = [random.random() for i in range(25)]
-        self.ax.plot(data, 'r-')
-        self.ax.set_title('PyQt Matplotlib Example')
+    @QtCore.pyqtSlot()
+    def plot(self, selectedIndex=None):
+        """Plot selected fits file"""
+        path_to_fits = selectedIndex[0].data(role=QtCore.Qt.UserRole)  # Path to file
+        image_data = fits.getdata(path_to_fits, ext=0)  # Get data from fits file
+
+        # Plot data in PlotCanvas window
+        self.ax.clear()
+        self.ax.imshow(image_data, cmap='gray')
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
+        plt.tight_layout()
         self.draw()

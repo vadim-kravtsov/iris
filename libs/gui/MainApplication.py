@@ -1,4 +1,4 @@
-from .filesystem import ListOfFiles
+from ..filesystem import ListOfFiles
 from .WorkDirBrowser import WorkDirBrowser
 from PyQt5 import QtWidgets
 
@@ -27,14 +27,13 @@ class MainApplication(QtWidgets.QMainWindow):
         files = QtWidgets.QFileDialog.getOpenFileNames(parent=self,
                                                        caption="Open file...",
                                                        filter=fits_extensions)
-        print(files[0])
 
     def open_directory(self):
 
         # Path to opened directory
         dir_path = QtWidgets.QFileDialog.getExistingDirectory(parent=self,
                                                               caption="Open directory...")
-        print(dir_path)
 
-        # Start work dir browser window
-        self.work_dir_browser = WorkDirBrowser(self, ListOfFiles(dir_path))
+        # Start work dir browser window if user choose a directiry
+        if dir_path:
+            self.work_dir_browser = WorkDirBrowser(self, ListOfFiles(dir_path))
