@@ -3,14 +3,13 @@ from PyQt5.QtWidgets import QSizePolicy
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
+import matplotlib.pyplot as plt
 
 class PlotCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=3, height=3, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot()
-
+        fig, self.ax = plt.subplots(figsize=(width, height), dpi=dpi)
+        
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
 
@@ -22,7 +21,6 @@ class PlotCanvas(FigureCanvas):
 
     def plot(self):
         data = [random.random() for i in range(25)]
-        ax = self.figure.add_subplot()
-        ax.plot(data, 'r-')
-        ax.set_title('PyQt Matplotlib Example')
+        self.ax.plot(data, 'r-')
+        self.ax.set_title('PyQt Matplotlib Example')
         self.draw()
