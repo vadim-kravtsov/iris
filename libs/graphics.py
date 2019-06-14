@@ -11,7 +11,7 @@ class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=3, height=3, dpi=100):
         fig, self.ax = plt.subplots(figsize=(width, height), dpi=dpi)
         self.ax.set_xticks([])
-        self.ax.set_xticks([])
+        self.ax.set_yticks([])
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
