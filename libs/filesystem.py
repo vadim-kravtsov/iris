@@ -5,6 +5,7 @@ from PyQt5 import QtCore
 
 class ListOfFiles(object):
     def __init__(self, dir_path):
+        self.base_path = dir_path
         self.file_paths = list(Path(dir_path).glob('*.*'))
         self.file_names = [p.parts[-1] for p in self.file_paths]
         self.qt_filelist = [QStandardItem(x) for x in self.file_names]

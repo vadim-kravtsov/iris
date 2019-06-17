@@ -9,6 +9,7 @@ class MainApplication(QtWidgets.QMainWindow):
         self.initUI()
 
     def initUI(self):
+        self.setWindowTitle("IRIS")
         self.setGeometry(200, 200, 1024, 768)
 
         # Create menu bar with actions

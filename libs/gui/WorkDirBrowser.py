@@ -7,68 +7,103 @@ class WorkDirBrowser(QtWidgets.QWidget):
     '''Window in which user can mark files as bias, dark, flat, etc.'''
     def __init__(self, parent, listOfFiles):
         super().__init__(parent=parent)
+        self.initUI(listOfFiles)
+        self.set_behavior()
 
+    def initUI(self, listOfFiles):
         # Set window properties
         self.setWindowFlags(QtCore.Qt.Window)
         self.setGeometry(350, 350, 800, 600)
+        self.setWindowTitle(str(listOfFiles.base_path))
 
         # Create containers
         self.hbox = QtWidgets.QHBoxLayout()
         self.vbox_left = QtWidgets.QVBoxLayout()
         self.vbox_right = QtWidgets.QVBoxLayout()
+        self.central_buttons = QtWidgets.QVBoxLayout()
 
         # Create and fill model
-        self.list_model = QtGui.QStandardItemModel()
-        self.list_model.appendColumn(listOfFiles.qt_filelist)
+        self.tagged_list_model = QtGui.QStandardItemModel()
+        self.untagged_list_model = QtGui.QStandardItemModel()
+        self.untagged_list_model.appendColumn(listOfFiles.qt_filelist)
+        self.untagged_list_model.sort(0)
 
-        # Create files list widgets
-        self.file_list = QtWidgets.QListView()
-        self.file_list.setModel(self.list_model)  # Set model as list_model
-        self.file_list.setWrapping(False)  # No line breaks
-        self.file_list.setSelectionMode(3)  # Set extended selection
-        self.file_list.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)  # Disable editing
+        # Create list view widget for viewing untagged files
+        self.untagged_file_list = QtWidgets.QListView()
+        self.untagged_file_list.setModel(self.untagged_list_model)  # Set model as untagged_list_model
+        self.untagged_file_list.setWrapping(False)  # No line breaks
+        self.untagged_file_list.setSelectionMode(3)  # Set extended selection
+        self.untagged_file_list.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)  # Disable editing
 
         # Create title
-        self.file_list_label = QtWidgets.QLabel("Untagged files:", parent=self)
-        self.file_list_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.untagged_file_list_label = QtWidgets.QLabel("Untagged files:", parent=self)
+        self.untagged_file_list_label.setAlignment(QtCore.Qt.AlignCenter)
 
         # Create search line
-        self.file_list_text_field = QtWidgets.QLineEdit(parent=self)
-        self.file_list_text_field.setCompleter(QtWidgets.QCompleter(listOfFiles.file_names, parent=self))
-        self.file_list_text_field.setPlaceholderText("Enter file mask...")
+        self.untagged_file_list_text_field = QtWidgets.QLineEdit(parent=self)
+        self.untagged_file_list_text_field.setPlaceholderText("Enter file mask...")
 
-        def search_by_mask(self, mask):
-            """Set as visible only file names which match the mask"""
-            file_names = listOfFiles.file_names
-            if mask:
-                indxs = [file_names.index(x) for x in file_names if fnmatch(x, mask)]
-                for i in range(len(file_names)):
-                    if i in indxs:
-                        self.file_list.setRowHidden(i, False)
-                    else:
-                        self.file_list.setRowHidden(i, True)
-            else:
-                for i in range(len(file_names)):
-                    self.file_list.setRowHidden(i, False)
-
-        # Showing fits file, choosed by mouseclick or by pressing "Return"
-        self.file_list.activated.connect(lambda: self.plot_canvas.plot(self.file_list.selectedIndexes()))
-
-        # Hiding file names as don't match the mask
-        self.file_list_text_field.textChanged.connect(lambda: search_by_mask(self, self.file_list_text_field.text()))
-
+        # Create plot canvas
         self.plot_canvas = PlotCanvas()
-        self.file_list3 = QtWidgets.QListView()
 
-        self.file_list3.setModel(self.list_model)
+        # Create list view widget for viewing tagged files
+        self.tagged_file_list = QtWidgets.QListView()
+        self.tagged_file_list.setModel(self.tagged_list_model)
+        self.tagged_file_list.setWrapping(False)  # No line breaks
+
+        # Create "add" button
+        self.add_button = QtWidgets.QPushButton(parent=self)
+        self.add_button.setText('A')
+        self.add_button.setMaximumWidth(50)
+
+        # Create "move as..." button
+        self.move_button = QtWidgets.QPushButton(parent=self)
+        self.move_button.setMaximumWidth(50)
+        self.move_button.setText("M")
+        self.move_button_menu = QtWidgets.QMenu()
+        self.move_button_menu.addAction("Object")
+        self.move_button_menu.addAction("Dark")
+        self.move_button_menu.addAction("Bias")
+        self.move_button_menu.addAction("Flat")
+        self.move_button_menu.addAction("Fringe")
+        self.move_button.setMenu(self.move_button_menu)
 
         # Packaging widgets in containers
-        self.vbox_left.addWidget(self.file_list_label)
-        self.vbox_left.addWidget(self.file_list_text_field)
-        self.vbox_left.addWidget(self.file_list)
+        self.vbox_left.addWidget(self.untagged_file_list_label)
+        self.vbox_left.addWidget(self.untagged_file_list_text_field)
+        self.vbox_left.addWidget(self.untagged_file_list)
         self.hbox.addLayout(self.vbox_left)
+        self.central_buttons.addWidget(self.add_button)
+        self.central_buttons.addWidget(self.move_button)
+        self.hbox.addLayout(self.central_buttons)
         self.vbox_right.addWidget(self.plot_canvas)
-        self.vbox_right.addWidget(self.file_list3)
+        self.vbox_right.addWidget(self.tagged_file_list)
         self.hbox.addLayout(self.vbox_right)
         self.setLayout(self.hbox)
         self.show()
+
+    def set_behavior(self):
+        # Showing fits file, choosed by mouseclick or by pressing "Return"
+        self.untagged_file_list.activated.connect(lambda: self.plot_canvas.plot(self.untagged_file_list.selectedIndexes()))
+
+        # Hiding file names as don't match the mask
+        self.untagged_file_list_text_field.textChanged.connect(lambda: self.search_by_mask(self.untagged_file_list_text_field.text()))
+
+    def search_by_mask(self, mask):
+        """Set as visible only file names which match the mask"""
+        file_names = []
+        for row in range(self.untagged_list_model.rowCount()):
+            file_names.append(self.untagged_list_model.item(row).text())
+        if mask:
+            mask = '*' + mask + '*'
+            indxs = [file_names.index(x) for x in file_names if fnmatch(x, mask)]
+            for i in range(len(file_names)):
+                if i in indxs:
+                    self.untagged_file_list.setRowHidden(i, False)
+                else:
+                    self.untagged_file_list.setRowHidden(i, True)
+            self.untagged_list_model.sort(0)
+        else:
+            for i in range(len(file_names)):
+                self.untagged_file_list.setRowHidden(i, False)
+            self.untagged_list_model.sort(0)
