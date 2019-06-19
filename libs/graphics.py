@@ -24,7 +24,7 @@ class PlotCanvas(FigureCanvas):
     @QtCore.pyqtSlot()
     def plot(self, selectedIndex=None):
         """Plot selected fits file"""
-        path_to_file = selectedIndex[0].data(role=QtCore.Qt.UserRole)  # Path to file
+        path_to_file = selectedIndex.data(role=QtCore.Qt.UserRole)  # Path to file
         fits_file_extensions = ['.fit', '.FIT', '.fts', '.FTS', '.fits', '.FITS']
         if path_to_file.suffix in fits_file_extensions:
             image_data = fits.getdata(path_to_file, ext=0)  # Get data from fits file

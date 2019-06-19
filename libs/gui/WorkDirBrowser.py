@@ -17,10 +17,12 @@ class WorkDirBrowser(QtWidgets.QWidget):
         self.setWindowTitle(str(listOfFiles.base_path))
 
         # Create containers
+        self.main_vbox = QtWidgets.QVBoxLayout()
         self.hbox = QtWidgets.QHBoxLayout()
         self.vbox_left = QtWidgets.QVBoxLayout()
         self.vbox_right = QtWidgets.QVBoxLayout()
         self.central_buttons = QtWidgets.QVBoxLayout()
+        self.footer = QtWidgets.QHBoxLayout()
 
         # Create and fill model
         self.untagged_list_model = QtGui.QStandardItemModel()
@@ -34,9 +36,12 @@ class WorkDirBrowser(QtWidgets.QWidget):
         self.untagged_file_list.setSelectionMode(3)  # Set extended selection
         self.untagged_file_list.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)  # Disable editing
 
-        # Create title
+        # Create titles
         self.untagged_file_list_label = QtWidgets.QLabel("Untagged files:", parent=self)
         self.untagged_file_list_label.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.tabs_with_tagged_label = QtWidgets.QLabel("Tagged files:", parent=self)
+        self.tabs_with_tagged_label.setAlignment(QtCore.Qt.AlignCenter)
 
         # Create search line
         self.untagged_file_list_text_field = QtWidgets.QLineEdit(parent=self)
@@ -45,16 +50,15 @@ class WorkDirBrowser(QtWidgets.QWidget):
         # Create plot canvas
         self.plot_canvas = PlotCanvas()
 
-        # Create and customize list view widget for viewing tagged files
-       
         # Create tab widget to show tagged_file_list as tabs
         self.tabs_with_tagged = QtWidgets.QTabWidget()
         self.tabs_with_tagged.file_types = ['object', 'darks', 'biases', 'flats', 'fringes']
-       
-        for i in range(len(self.tabs_with_tagged.file_types)):
-            self.tabs_with_tagged.addTab(QtWidgets.QListView(), self.tabs_with_tagged.file_types[i])
-            self.tabs_with_tagged.widget(i).setModel(QtGui.QStandardItemModel())
-            self.tabs_with_tagged.widget(i).setSelectionMode(3)
+        
+        for tab_index in range(len(self.tabs_with_tagged.file_types)):
+            self.tabs_with_tagged.addTab(QtWidgets.QListView(), self.tabs_with_tagged.file_types[tab_index])
+            self.tabs_with_tagged.widget(tab_index).setModel(QtGui.QStandardItemModel())
+            self.tabs_with_tagged.widget(tab_index).setSelectionMode(3)
+            self.tabs_with_tagged.widget(tab_index).setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
         # Create "add" button
         self.add_button = QtWidgets.QPushButton(parent=self)
@@ -66,34 +70,51 @@ class WorkDirBrowser(QtWidgets.QWidget):
         self.move_button.setMaximumWidth(50)
         self.move_button.setText("M")
         self.move_button_menu = QtWidgets.QMenu()
-        self.move_button_menu.addAction("Object", lambda: self.mark_files_as('object'))
-        self.move_button_menu.addAction("Dark", lambda: self.mark_files_as('darks'))
-        self.move_button_menu.addAction("Bias", lambda: self.mark_files_as('biases'))
-        self.move_button_menu.addAction("Flat", lambda: self.mark_files_as('flats'))
-        self.move_button_menu.addAction("Fringe", lambda: self.mark_files_as('fringes'))
+        self.move_button_menu.addAction("Object", lambda: self.tag_files_as('object'))
+        self.move_button_menu.addAction("Dark", lambda: self.tag_files_as('darks'))
+        self.move_button_menu.addAction("Bias", lambda: self.tag_files_as('biases'))
+        self.move_button_menu.addAction("Flat", lambda: self.tag_files_as('flats'))
+        self.move_button_menu.addAction("Fringe", lambda: self.tag_files_as('fringes'))
         self.move_button.setMenu(self.move_button_menu)
 
+        # Fill footer
+        self.ok_button = QtWidgets.QPushButton(parent=self)
+        self.ok_button.setText("Ok")
+        self.cancel_button = QtWidgets.QPushButton(parent=self)
+        self.cancel_button.setText("Cancel")
+        self.ok_button.setMaximumWidth(100)
+        self.cancel_button.setMaximumWidth(100)
+        self.footer.addStretch()
+        self.footer.addWidget(self.cancel_button, alignment=QtCore.Qt.AlignLeft)
+        self.footer.addWidget(self.ok_button, alignment=QtCore.Qt.AlignRight)
+        
         # Packaging widgets in containers
         self.vbox_left.addWidget(self.untagged_file_list_label)
         self.vbox_left.addWidget(self.untagged_file_list_text_field)
         self.vbox_left.addWidget(self.untagged_file_list)
         self.hbox.addLayout(self.vbox_left)
-        self.central_buttons.addWidget(self.add_button)
-        self.central_buttons.addWidget(self.move_button)
+        self.central_buttons.addStretch()
+        self.central_buttons.addWidget(self.add_button, alignment=QtCore.Qt.AlignCenter)
+        self.central_buttons.addWidget(self.move_button, alignment=QtCore.Qt.AlignCenter)
+        self.central_buttons.addStretch()
         self.hbox.addLayout(self.central_buttons)
         self.vbox_right.addWidget(self.plot_canvas)
+        self.vbox_right.addWidget(self.tabs_with_tagged_label)
         self.vbox_right.addWidget(self.tabs_with_tagged)
         self.hbox.addLayout(self.vbox_right)
-        self.setLayout(self.hbox)
+        self.main_vbox.addLayout(self.hbox)
+        self.main_vbox.addLayout(self.footer)
+        self.setLayout(self.main_vbox)
         self.show()
 
     def set_behavior(self):
         # Showing fits file, choosed by mouseclick or by pressing "Return"
-        self.untagged_file_list.activated.connect(lambda: self.plot_canvas.plot(self.untagged_file_list.selectedIndexes()))
-
+        self.untagged_file_list.activated.connect(lambda: self.plot_canvas.plot(self.untagged_file_list.currentIndex()))
+    
         # Hiding file names as don't match the mask
         self.untagged_file_list_text_field.textChanged.connect(lambda: self.search_by_mask(self.untagged_file_list_text_field.text()))
 
+    @QtCore.pyqtSlot()
     def search_by_mask(self, mask):
         """Set as visible only file names which match the mask"""
         file_names = []
@@ -113,7 +134,8 @@ class WorkDirBrowser(QtWidgets.QWidget):
                 self.untagged_file_list.setRowHidden(i, False)
             self.untagged_list_model.sort(0)
 
-    def mark_files_as(self, label):
+    @QtCore.pyqtSlot()
+    def tag_files_as(self, label):
         """Function for tagging files as dark, bias, flat, etc."""
         selected_items = [self.untagged_list_model.itemFromIndex(x) for x in self.untagged_file_list.selectedIndexes()]
         tab_index = self.tabs_with_tagged.file_types.index(label)
@@ -122,4 +144,4 @@ class WorkDirBrowser(QtWidgets.QWidget):
             self.untagged_list_model.takeRow(item.row())
             self.tabs_with_tagged.widget(tab_index).model().appendRow(item)
         self.untagged_file_list.clearSelection()
-        
+        self.tabs_with_tagged.setCurrentIndex(tab_index)
