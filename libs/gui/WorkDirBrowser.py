@@ -53,7 +53,7 @@ class WorkDirBrowser(QtWidgets.QWidget):
         # Create tab widget to show tagged_file_list as tabs
         self.tabs_with_tagged = QtWidgets.QTabWidget()
         self.tabs_with_tagged.file_types = ['object', 'darks', 'biases', 'flats', 'fringes']
-        
+        self.tabs_with_tagged.setUsesScrollButtons(False)
         for tab_index in range(len(self.tabs_with_tagged.file_types)):
             self.tabs_with_tagged.addTab(QtWidgets.QListView(), self.tabs_with_tagged.file_types[tab_index])
             self.tabs_with_tagged.widget(tab_index).setModel(QtGui.QStandardItemModel())
