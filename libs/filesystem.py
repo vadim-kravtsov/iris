@@ -11,3 +11,10 @@ class ListOfFiles(object):
         self.qt_filelist = [QStandardItem(x) for x in self.file_names]
         for item in self.qt_filelist:
             item.setData(self.file_paths[self.qt_filelist.index(item)], role=QtCore.Qt.UserRole)
+
+
+class Settings(object):
+    def __init__(self):
+        self.file_tags = ['object', 'darks', 'biases', 'flats', 'fringes']
+        self.file_masks = dict(object='lsi', darks='dark', biases='bias',
+                               flats='flat', fringes='fring')
